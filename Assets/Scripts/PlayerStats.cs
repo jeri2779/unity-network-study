@@ -11,11 +11,11 @@ public class PlayerStats : NetworkBehaviour
 
 
      
-    private readonly NetworkVariable<int> m_Score = new NetworkVariable<int>(
-        0,
-        NetworkVariableReadPermission.Everyone,
-        NetworkVariableWritePermission.Server
-    );
+    // private readonly NetworkVariable<int> m_Score = new NetworkVariable<int>(
+    //     0,
+    //     NetworkVariableReadPermission.Everyone,
+    //     NetworkVariableWritePermission.Server
+    // );
 
      private readonly NetworkVariable<int> m_Hp = new NetworkVariable<int>(
         0,
@@ -31,12 +31,12 @@ public class PlayerStats : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
-        m_Score.OnValueChanged += HandleScoreChanged;
+        //m_Score.OnValueChanged += HandleScoreChanged;
         m_Hp.OnValueChanged += HandleHealthChanged;
         m_DisplayName.OnValueChanged +=HandleNamehanged;
         
 
-        ApplyScore(m_Score.Value);
+        ApplyScore(m_Score);
         ApplyHealth(m_Hp.Value);
         ApplyName(m_DisplayName.Value);
 
@@ -52,7 +52,7 @@ public class PlayerStats : NetworkBehaviour
     }
     public override void OnNetworkDespawn()
     {
-        m_Score.OnValueChanged -= HandleScoreChanged;
+        //m_Score.OnValueChanged -= HandleScoreChanged;
         m_Hp.OnValueChanged -= HandleHealthChanged;
         m_DisplayName.OnValueChanged -=HandleNamehanged;
     }
@@ -68,7 +68,7 @@ public class PlayerStats : NetworkBehaviour
          
         if(keyboard.eKey.wasPressedThisFrame)
         {
-            RequestScoreRpc(m_ScorePerPress);
+            RequestScoreRpc();
         }
 
          
@@ -76,23 +76,56 @@ public class PlayerStats : NetworkBehaviour
         {
             m_Hp.Value -= 10;
         }
+        if(!IsServer)
+        {
+            RequestCurrentScoreRpc();
+        }
     }
+    int m_Score;
 
     //score => rpc 변경
     [Rpc(SendTo.Server)]
-    private void RequestScoreRpc(int amount, RpcParams rpcParams = default)
+    private void RequestScoreRpc(RpcParams rpcParams = default)
     {
         ulong sender = rpcParams.Receive.SenderClientId;
-        // [검증용] 이 로그는 서버(Host 창)에서만 떠야 정상 — 실제 점수 변경은 서버가 수행
-        Debug.Log($"[server] 점수 요청 수신: client {sender} +{amount} (Host 창에만 떠야 정상)");
-        m_Score.Value += amount;
+        // Debug.Log($"[server] 점수 요청 수신: client {sender} +{amount}");
+        // m_Score.Value += amount;
+
+        if(sender != OwnerClientId)
+        {
+            return;
+        }
+        m_Score += m_ScorePerPress;
+        BroadCastScoreRpc(m_Score);
     }
+
+    [Rpc(SendTo.ClientsAndHost)]
+    private void BroadCastScoreRpc(int newScore)
+    {
+        m_Score = newScore;
+        ApplyScore(m_Score);
+    }
+
+    [Rpc(SendTo.Server)]
+    private void RequestCurrentScoreRpc(RpcParams rpcParams = default)
+    {
+        ulong senderClientId = rpcParams.Receive.SenderClientId;
+        SendCurrentScoreRpc(m_Score,RpcTarget.Single(senderClientId, RpcTargetUse.Temp));
+    }
+
+    [Rpc(SendTo.SpecifiedInParams)]
+    private void SendCurrentScoreRpc(int currentScore, RpcParams rpcParams)
+    {
+        ulong  senderClientId = rpcParams.Receive.SenderClientId;
+        ApplyScore(m_Score);
+    }
+
 
     private void HandleScoreChanged(int prev, int cur)
     {
         ApplyScore(cur);
-        // [검증용] 이 로그는 양쪽 창 모두 떠야 정상 — NetworkVariable이 복제됐다는 증거
-        Debug.Log($"[playerstats] 스코어 {prev} -> {cur} | IsServer={IsServer}, IsOwner={IsOwner}, owner=client{OwnerClientId} (양쪽 창 모두 떠야 정상)");
+        
+        Debug.Log($"[playerstats] 스코어 {prev} -> {cur} | IsServer={IsServer}, IsOwner={IsOwner}, owner=client{OwnerClientId}");
     }
  
     private void HandleHealthChanged(int prev, int cur)

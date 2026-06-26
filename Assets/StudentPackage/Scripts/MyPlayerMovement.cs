@@ -58,7 +58,7 @@ namespace NetworkStudy.Student
             float speed = m_MoveSpeed;
             if (keyboard.leftShiftKey.isPressed) speed *= m_SprintMul;
 
-            // [검증용] 스프린트 입력 확인 (누를/뗄 때 1회씩)
+          
             if (keyboard.leftShiftKey.wasPressedThisFrame) Debug.Log($"[Move] 스프린트 ON (client {OwnerClientId})");
             if (keyboard.leftShiftKey.wasReleasedThisFrame) Debug.Log($"[Move] 스프린트 OFF (client {OwnerClientId})");
 
@@ -68,8 +68,7 @@ namespace NetworkStudy.Student
                 if (keyboard.spaceKey.wasPressedThisFrame)
                 {
                     m_VerticalVelocity = m_JumpHeight;
-                    // [검증용] 점프는 바닥에 있을 때만 발동 — 공중에선 이 로그가 안 떠야 정상
-                    Debug.Log($"[Move] 점프! (client {OwnerClientId}) vVel={m_VerticalVelocity:F2}");
+                    Debug.Log($"[Move] 점프! (client {OwnerClientId}) 높이={m_VerticalVelocity:F2}");
                 }
             }
             else
