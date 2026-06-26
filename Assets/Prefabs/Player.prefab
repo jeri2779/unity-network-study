@@ -128,6 +128,8 @@ GameObject:
   - component: {fileID: 2955887074296862241}
   - component: {fileID: 581424726708786497}
   - component: {fileID: 4701337687327719269}
+  - component: {fileID: -1816658221518270741}
+  - component: {fileID: -385108666401585707}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -318,6 +320,9 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   m_MoveSpeed: 5
   m_RotateSpeed: 120
+  m_SprintMultiplier: 2
+  m_JumpHeight: 5
+  m_Gravity: -9.81
 --- !u!114 &4701337687327719269
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -333,3 +338,42 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   m_ScorePerPress: 5
   m_StartHealth: 100
+--- !u!114 &-1816658221518270741
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8439532676187692432}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7c9eb9b831fc0e6439783a79de42c6e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RPCDemo
+  ShowTopMostFoldoutHeaderGroup: 1
+  m_ActionId: 1
+--- !u!143 &-385108666401585707
+CharacterController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8439532676187692432}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Height: 2
+  m_Radius: 0.5
+  m_SlopeLimit: 45
+  m_StepOffset: 0.3
+  m_SkinWidth: 0.08
+  m_MinMoveDistance: 0.001
+  m_Center: {x: 0, y: 0, z: 0}

@@ -9,10 +9,12 @@ public class PlayerStats : NetworkBehaviour
     public int m_ScorePerPress = 1;
     public int m_StartHealth = 100;
 
+
+     
     private readonly NetworkVariable<int> m_Score = new NetworkVariable<int>(
         0,
         NetworkVariableReadPermission.Everyone,
-        NetworkVariableWritePermission.Owner
+        NetworkVariableWritePermission.Server
     );
 
      private readonly NetworkVariable<int> m_Hp = new NetworkVariable<int>(
@@ -63,21 +65,34 @@ public class PlayerStats : NetworkBehaviour
         Keyboard keyboard = Keyboard.current;
         if(keyboard == null) return;
 
-        if(keyboard.spaceKey.wasPressedThisFrame)
+         
+        if(keyboard.eKey.wasPressedThisFrame)
         {
-            m_Score.Value += m_ScorePerPress;
-
+            RequestScoreRpc(m_ScorePerPress);
         }
-        if(keyboard.hKey.wasPressedThisFrame)
+
+         
+        if(IsServer && keyboard.hKey.wasPressedThisFrame)
         {
             m_Hp.Value -= 10;
         }
     }
 
+    //score => rpc 변경
+    [Rpc(SendTo.Server)]
+    private void RequestScoreRpc(int amount, RpcParams rpcParams = default)
+    {
+        ulong sender = rpcParams.Receive.SenderClientId;
+        // [검증용] 이 로그는 서버(Host 창)에서만 떠야 정상 — 실제 점수 변경은 서버가 수행
+        Debug.Log($"[server] 점수 요청 수신: client {sender} +{amount} (Host 창에만 떠야 정상)");
+        m_Score.Value += amount;
+    }
+
     private void HandleScoreChanged(int prev, int cur)
     {
         ApplyScore(cur);
-        Debug.Log($"[playerstats] 스코어 변경 {prev} -> {cur}");
+        // [검증용] 이 로그는 양쪽 창 모두 떠야 정상 — NetworkVariable이 복제됐다는 증거
+        Debug.Log($"[playerstats] 스코어 {prev} -> {cur} | IsServer={IsServer}, IsOwner={IsOwner}, owner=client{OwnerClientId} (양쪽 창 모두 떠야 정상)");
     }
  
     private void HandleHealthChanged(int prev, int cur)
